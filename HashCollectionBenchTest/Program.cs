@@ -10,7 +10,20 @@ namespace HashCollectionBenchTest
     {
         static void Main(string[] args)
         {
-            RunFastDictionaryBenchTest(10000);
+            string s = "R";
+            while (s == "R")
+            {
+                RunFastDictionaryBenchTest(100);
+                RunFastDictionaryBenchTest(1000);
+                RunFastDictionaryBenchTest(10000);
+                RunFastDictionaryBenchTest(100000);
+
+                Console.WriteLine("Press 'R' to repeat");
+                s = Console.ReadLine().ToUpper();
+
+            }
+
+            Console.ReadLine().ToUpper();
         }
 
         public static void RunFastDictionaryBenchTest(int size)
@@ -51,7 +64,7 @@ namespace HashCollectionBenchTest
 
                 Thread.CurrentThread.Priority = ThreadPriority.Normal;
 
-                s = Console.ReadLine().ToUpper();
+                s = "E";
             }
         }
 
