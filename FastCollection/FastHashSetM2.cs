@@ -151,18 +151,19 @@ namespace Nano3.HashCollection
             }
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             if (Count > 0)
             {
-                Array.Clear(_bucket, 0, _count);
-                Array.Clear(_next, 0, _count);
-                Array.Clear(_values, 0, _count);
-                Array.Clear(_fillMarker, 0, _count);
+                Array.Clear(_bucket, 0, _bucket.Length);
+                Array.Clear(_next, 0, _next.Length);
+                Array.Clear(_values, 0, _values.Length);
+                Array.Clear(_fillMarker, 0, _fillMarker.Length);
 
                 _count = 1;
                 _freeCount = 0;
                 _nextFree = 0;
+                _mask = _size - 1;
             }
         }
 

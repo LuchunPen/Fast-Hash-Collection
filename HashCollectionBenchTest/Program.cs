@@ -45,7 +45,7 @@ namespace HashCollectionBenchTest
                 }
 
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
-
+                
                 Dictionary<long, long> dict = new Dictionary<long, long>();
                 string dres = RunTest("Dictionary add", DictAddBench, Arr, dict);
                 dres += ", " + RunTest("contains", DictContainsBench, Arr, dict);

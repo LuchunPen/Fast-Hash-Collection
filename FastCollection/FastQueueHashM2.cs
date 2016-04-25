@@ -172,14 +172,14 @@ namespace Nano3.HashCollection
             return v;
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             if (Count > 0)
             {
-                Array.Clear(_bucket, 0, _count);
-                Array.Clear(_next, 0, _count);
-                Array.Clear(_values, 0, _count);
-                Array.Clear(_fillMarker, 0, _count);
+                Array.Clear(_bucket, 0, _bucket.Length);
+                Array.Clear(_next, 0, _next.Length);
+                Array.Clear(_values, 0, _values.Length);
+                Array.Clear(_fillMarker, 0, _fillMarker.Length);
                 Array.Clear(_queue, 0, _queue.Length);
 
                 _count = 1;
