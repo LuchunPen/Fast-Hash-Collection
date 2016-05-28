@@ -292,12 +292,12 @@ namespace Nano3.HashCollection
 
         public ICollection<TKey> Keys
         {
-            get { return _keys; }
+            get { return GetKeys(); }
         }
 
         public ICollection<TValue> Values
         {
-            get { return _values; }
+            get { return GetValues(); }
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
