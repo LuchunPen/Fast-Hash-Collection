@@ -72,7 +72,7 @@ namespace Nano3.HashCollection
                     next = itempos;
                     for (int i = itempos; i > 0; i = _next[i])
                     {
-                        if (_keys[i].Equals(key)) { _values[i] = value; }
+                        if (_keys[i].Equals(key)) { _values[i] = value; return; }
                     }
                 }
                 if (_freeCount > 0)
