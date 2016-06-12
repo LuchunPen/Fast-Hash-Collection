@@ -63,15 +63,31 @@ namespace Nano3.HashCollection
             }
             set
             {
-                int itempos = _bucket[(key.GetHashCode() & _mask)];
+                int hash = key.GetHashCode() & _mask;
+                int itempos = _bucket[hash];
 
-                FINDMATCH:
-                if (itempos == 0) throw new Exception("This id not exist");
-                if (_keys[itempos].Equals(key)) { _values[itempos] = value; }
+                int next = 0;
+                if (itempos > 0)
+                {
+                    next = itempos;
+                    for (int i = itempos; i > 0; i = _next[i])
+                    {
+                        if (_keys[i].Equals(key)) { _values[i] = value; }
+                    }
+                }
+                if (_freeCount > 0)
+                {
+                    int pos = _bucket[hash] = _nextFree;
+                    _nextFree = _next[_nextFree];
+                    _next[pos] = next; _values[pos] = value; _keys[pos] = key; _fillmarker[pos] = true;
+                    _freeCount--;
+                }
                 else
                 {
-                    itempos = _next[itempos];
-                    goto FINDMATCH;
+                    _next[_count] = next; _values[_count] = value; _keys[_count] = key; _fillmarker[_count] = true;
+                    _bucket[hash] = _count;
+                    _count = _count + 1;
+                    if (_count >= _size) { Resize(_size * 2); }
                 }
             }
         }
