@@ -6,7 +6,7 @@ Date: 31/03/2016 09:18
 using System;
 using System.Collections.Generic;
 
-namespace Nano3.HashCollection
+namespace Nano3.Collection
 {
     public interface IQueueHash<TValue> : IEnumerable<TValue>
     {

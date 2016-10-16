@@ -7,7 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Nano3.HashCollection
+namespace Nano3.Collection
 {
     public class FastHashSetM2<TValue> : ICollection<TValue>
         where TValue : IEquatable<TValue>

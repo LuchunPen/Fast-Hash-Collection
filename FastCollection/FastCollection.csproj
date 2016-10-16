@@ -38,6 +38,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DoubleThreadDictStorage.cs" />
+    <Compile Include="DoubleThreadHashStorage.cs" />
     <Compile Include="FastDictionaryM2.cs" />
     <Compile Include="FastHashSetM2.cs" />
     <Compile Include="FastQueueDictionaryM2.cs" />

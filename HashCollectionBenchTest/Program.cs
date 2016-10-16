@@ -3,7 +3,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using Nano3.HashCollection;
+using Nano3.Collection;
 namespace HashCollectionBenchTest
 {
     class Program

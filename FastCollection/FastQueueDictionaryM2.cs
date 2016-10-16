@@ -7,7 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Nano3.HashCollection
+namespace Nano3.Collection
 {
     public class FastQueueDictionaryM2<TKey, TValue> : IQueueDictionary<TKey, TValue>
         where TKey : struct, IEquatable<TKey>

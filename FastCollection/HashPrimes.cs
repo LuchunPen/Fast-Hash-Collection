@@ -6,7 +6,7 @@ Date: 22.01.2016 9:01:01
 using System;
 using System.Collections.Generic;
 
-namespace Nano3.HashCollection
+namespace Nano3.Collection
 {
     public static class HashPrimes
     {

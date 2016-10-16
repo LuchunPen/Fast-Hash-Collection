@@ -7,7 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Nano3.HashCollection
+namespace Nano3.Collection
 {
     public class FastDictionaryM2<TKey, TValue> : IDictionary<TKey, TValue>
         where TKey : struct, IEquatable<TKey>
@@ -231,6 +231,17 @@ namespace Nano3.HashCollection
                 v[id++] = _values[i];
             }
             return v;
+        }
+
+        public KeyValuePair<TKey, TValue>[] GetKeyValues()
+        {
+            KeyValuePair<TKey, TValue>[] kv = new KeyValuePair<TKey, TValue>[Count];
+            int id = 0;
+            for (int i = 0; i < _count; i++) {
+                if (!_fillmarker[i]) continue;
+                kv[id++] = new KeyValuePair<TKey, TValue>(_keys[i], _values[i]);
+            }
+            return kv;
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
