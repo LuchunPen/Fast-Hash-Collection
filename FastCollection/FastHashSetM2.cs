@@ -14,6 +14,23 @@ namespace Nano3.Collection
     {
         //private static readonly string stringUID = "ABC188E99ACD9C04";
 
+        protected static readonly int[] primesM2 =
+        {
+            4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
+            8192, 16384, 32768, 65536, 131072, 262144, 524288,
+            1048576, 2097152, 4194304, 8388608
+        };
+
+        protected static int GetPrimeM2(int capacity)
+        {
+            if (capacity < primesM2[0]) { return primesM2[0]; }
+            for (int i = 0; i < primesM2.Length; i++)
+            {
+                if (primesM2[i] >= capacity) { return primesM2[i]; }
+            }
+            return primesM2[primesM2.Length - 1];
+        }
+
         protected int[] _bucket;
 
         protected TValue[] _values;
@@ -26,9 +43,12 @@ namespace Nano3.Collection
         protected int _nextFree;
         protected int _size;
         protected int _mask;
+        protected DoubleKeyMode _dkMode;
+        public DoubleKeyMode DKMode { get { return _dkMode; } }
 
-        public FastHashSetM2() : this(4) { }
-        public FastHashSetM2(int capacity)
+        public FastHashSetM2() : this(4, DoubleKeyMode.KeepExist) { }
+        public FastHashSetM2(DoubleKeyMode dkmode) : this(4, dkmode) { }
+        public FastHashSetM2(int capacity, DoubleKeyMode dkmode)
         {
             int cap = HashPrimes.GetPrimeM2(capacity);
 
@@ -42,6 +62,8 @@ namespace Nano3.Collection
             _nextFree = 0;
             _size = cap;
             _mask = _size - 1;
+
+            _dkMode = dkmode;
         }
 
         public int Count { get { return _count - _freeCount - 1; } }
@@ -66,7 +88,13 @@ namespace Nano3.Collection
                 {
                     if (_values[i].Equals(item))
                     {
-                        throw new ArgumentException("This id already exist");
+                        if (_dkMode == DoubleKeyMode.Repcale){
+                            _values[i] = item;
+                        }
+                        else if (_dkMode == DoubleKeyMode.ThrowException){
+                            throw new ArgumentException("this key is already exist");
+                        }
+                        return;
                     }
                 }
                 //=========================================
@@ -90,7 +118,26 @@ namespace Nano3.Collection
 
                 _bucket[hash] = _count;
                 _count = _count + 1;
-                if (_count >= _size) { Resize(_size * 2); }
+                if (_count >= _size * 0.75f) { Resize(_size * 2); }
+            }
+        }
+
+        public void Add(TValue[] items)
+        {
+            if (items == null || items.Length == 0) { return; }
+            for (int i = 0; i < items.Length; i++)
+            {
+                Add(items[i]);
+            }
+        }
+
+        public void Add(List<TValue> items)
+        {
+            if (items == null || items.Count == 0) { return; }
+            int count = items.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Add(items[i]);
             }
         }
 
@@ -176,12 +223,12 @@ namespace Nano3.Collection
             int[] newnext = new int[newSize];
 
             bool[] newfillmarker = new bool[newSize];
-            Array.Copy(_fillMarker, newfillmarker, _size);
+            Array.Copy(_fillMarker, newfillmarker, _count);
 
             TValue[] newvalues = new TValue[newSize];
-            Array.Copy(_values, newvalues, _size);
+            Array.Copy(_values, newvalues, _count);
 
-            for (int i = 1; i < _size; i++)
+            for (int i = 1; i < _count; i++)
             {
                 int bucket = newvalues[i].GetHashCode() & newMask;
                 newnext[i] = newBucket[bucket];

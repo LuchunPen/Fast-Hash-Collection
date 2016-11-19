@@ -14,6 +14,22 @@ namespace Nano3.Collection
     {
         //private static readonly string stringUID = "CC78FEF1FDAD4302";
 
+        protected static readonly int[] primesM2 =
+        {
+            4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
+            8192, 16384, 32768, 65536, 131072, 262144, 524288,
+            1048576, 2097152, 4194304, 8388608
+        };
+
+        protected static int GetPrimeM2(int capacity)
+        {
+            if (capacity < primesM2[0]) { return primesM2[0]; }
+            for (int i = 0; i < primesM2.Length; i++) {
+                if (primesM2[i] >= capacity) { return primesM2[i]; }
+            }
+            return primesM2[primesM2.Length - 1];
+        }
+
         protected int[] _bucket;
 
         protected TKey[] _keys;
@@ -28,10 +44,14 @@ namespace Nano3.Collection
         protected int _size;
         protected int _mask;
 
-        public FastDictionaryM2() : this (4) { }
-        public FastDictionaryM2(int capacity)
+        protected DoubleKeyMode _dkMode;
+        public DoubleKeyMode DKMode { get { return _dkMode; } }
+
+        public FastDictionaryM2() : this (4, DoubleKeyMode.KeepExist) { }
+        public FastDictionaryM2(DoubleKeyMode dkmode) : this(4, dkmode){ }
+        public FastDictionaryM2(int capacity, DoubleKeyMode dkmode)
         {
-            int cap = HashPrimes.GetPrimeM2(capacity);
+            int cap = GetPrimeM2(capacity);
             _size = cap;
 
             _bucket = new int[_size];
@@ -44,6 +64,7 @@ namespace Nano3.Collection
             _count = 1;
             _nextFree = 0;
             _mask = _size - 1;
+            _dkMode = dkmode;
         }
 
         public virtual TValue this[TKey key]
@@ -53,7 +74,7 @@ namespace Nano3.Collection
                 int itempos = _bucket[(key.GetHashCode() & _mask)];
 
                 FINDMATCH:
-                if (itempos == 0) { throw new Exception("This id not exist"); }
+                if (itempos == 0) { throw new ArgumentNullException(); }
                 if (_keys[itempos].Equals(key)) { return _values[itempos]; }
                 else
                 {
@@ -72,7 +93,11 @@ namespace Nano3.Collection
                     next = itempos;
                     for (int i = itempos; i > 0; i = _next[i])
                     {
-                        if (_keys[i].Equals(key)) { _values[i] = value; return; }
+                        if (_keys[i].Equals(key))
+                        {
+                            _values[i] = value;
+                            return;
+                        }
                     }
                 }
                 if (_freeCount > 0)
@@ -87,7 +112,7 @@ namespace Nano3.Collection
                     _next[_count] = next; _values[_count] = value; _keys[_count] = key; _fillmarker[_count] = true;
                     _bucket[hash] = _count;
                     _count = _count + 1;
-                    if (_count >= _size) { Resize(_size * 2); }
+                    if (_count >= _size * 0.75f) { Resize(_size * 2); }
                 }
             }
         }
@@ -115,6 +140,7 @@ namespace Nano3.Collection
                 goto FINDMATCH;
             }
         }
+
         public virtual void Add(TKey key, TValue value)
         {
             int hash = key.GetHashCode() & _mask;
@@ -129,7 +155,13 @@ namespace Nano3.Collection
                 {
                     if (_keys[i].Equals(key))
                     {
-                        throw new Exception("This id already exist");
+                        if (_dkMode == DoubleKeyMode.Repcale){
+                            _values[i] = value;
+                        }
+                        else if (_dkMode == DoubleKeyMode.ThrowException){
+                            throw new ArgumentException("this key is already exist");
+                        }
+                        return;
                     }
                 }
                 //=========================================
@@ -146,9 +178,29 @@ namespace Nano3.Collection
                 _next[_count] = next; _values[_count] = value; _keys[_count] = key; _fillmarker[_count] = true;
                 _bucket[hash] = _count;
                 _count = _count + 1;
-                if (_count >= _size) { Resize(_size * 2); }
+                if (_count >= _size * 0.75f) { Resize(_size * 2); }
             }
         }
+
+        public void Add(KeyValuePair<TKey, TValue>[] kvs)
+        {
+            if (kvs == null || kvs.Length == 0) return;
+            for (int i = 0; i < kvs.Length; i++)
+            {
+                Add(kvs[i].Key, kvs[i].Value);
+            }
+        }
+
+        public void Add(List<KeyValuePair<TKey, TValue>> kvs)
+        {
+            if (kvs == null || kvs.Count == 0) return;
+            int count = kvs.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Add(kvs[i].Key, kvs[i].Value);
+            }
+        }
+
         public bool Remove(TKey key)
         {
             int hash = key.GetHashCode() & _mask;
@@ -193,6 +245,53 @@ namespace Nano3.Collection
                 goto FINDMATCH;
             }
         }
+
+        public bool TryGetAndRemove(TKey key, out TValue value)
+        {
+            int hash = key.GetHashCode() & _mask;
+            int itempos = _bucket[hash];
+
+            int prev = 0;
+
+        FINDMATCH:
+            if (itempos == 0) { value = default(TValue); return false; }
+            if (_keys[itempos].Equals(key))
+            {
+                if (prev == 0) { _bucket[hash] = _next[itempos]; }
+                else { _next[prev] = _next[itempos]; }
+
+                value = _values[itempos];
+                _values[itempos] = default(TValue);
+                _keys[itempos] = default(TKey);
+                _next[itempos] = _nextFree;
+                _fillmarker[itempos] = false;
+
+                _nextFree = itempos;
+                _freeCount++;
+                return true;
+            }
+            else
+            {
+                prev = itempos;
+                itempos = _next[itempos];
+                goto FINDMATCH;
+            }
+        }
+
+        public TValue GetValueOrDefault(TKey key)
+        {
+            int itempos = _bucket[(key.GetHashCode() & _mask)];
+
+            FINDMATCH:
+            if (itempos == 0) { return default(TValue); }
+            if (_keys[itempos].Equals(key)) { return _values[itempos]; }
+            else
+            {
+                itempos = _next[itempos];
+                goto FINDMATCH;
+            }
+        }
+
         public virtual void Clear()
         {
             if (Count > 0)
@@ -221,6 +320,7 @@ namespace Nano3.Collection
             }
             return k;
         }
+
         public TValue[] GetValues()
         {
             TValue[] v = new TValue[Count];
@@ -237,7 +337,8 @@ namespace Nano3.Collection
         {
             KeyValuePair<TKey, TValue>[] kv = new KeyValuePair<TKey, TValue>[Count];
             int id = 0;
-            for (int i = 0; i < _count; i++) {
+            for (int i = 0; i < _count; i++)
+            {
                 if (!_fillmarker[i]) continue;
                 kv[id++] = new KeyValuePair<TKey, TValue>(_keys[i], _values[i]);
             }
@@ -300,7 +401,7 @@ namespace Nano3.Collection
             TValue[] newvalues = new TValue[newSize];
             Array.Copy(_values, newvalues, _count);
 
-            for (int i = 1; i < _size; i++)
+            for (int i = 1; i < _count; i++)
             {
                 int bucket = newkeys[i].GetHashCode() & newMask;
                 newnext[i] = newBucket[bucket];

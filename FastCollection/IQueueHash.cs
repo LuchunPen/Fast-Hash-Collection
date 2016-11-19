@@ -26,10 +26,14 @@ namespace Nano3.Collection
         TValue this[TKey key] { get; set; }
 
         int Count { get; }
+        bool ContainsKey(TKey key);
         bool Enqueue(TKey key, TValue value);
         TValue Dequeue();
         TValue Peek();
-        bool ContainsKey(TKey key);
+
+        KeyValuePair<TKey, TValue> DequeuePair();
+        KeyValuePair<TKey, TValue> PeekPair();
+        KeyValuePair<TKey, TValue>[] DequeueAllKeyValues();
 
         TValue[] DequeueAll();
         TValue[] GetValues();

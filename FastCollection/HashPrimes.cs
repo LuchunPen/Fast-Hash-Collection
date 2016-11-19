@@ -19,13 +19,6 @@ namespace Nano3.Collection
         1674319, 2009191, 2411033, 2893249, 3471899, 4166287, 4999559, 5999471, 7199369
         };
 
-        public static readonly int[] primesM2 =
-        {
-            4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
-            8192, 16384, 32768, 65536, 131072, 262144, 524288,
-            1048576, 2097152, 4194304, 8388608
-        };
-
         public static int GetPrime(int capacity)
         {
             if (capacity < primes[0]) { return primes[0] + 1; }
@@ -35,6 +28,13 @@ namespace Nano3.Collection
             }
             return primes[primes.Length - 1] + 1;
         }
+
+        public static readonly int[] primesM2 =
+        {
+            4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
+            8192, 16384, 32768, 65536, 131072, 262144, 524288,
+            1048576, 2097152, 4194304, 8388608
+        };
 
         public static int GetPrimeM2(int capacity)
         {
