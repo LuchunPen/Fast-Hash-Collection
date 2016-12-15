@@ -50,7 +50,7 @@ namespace Nano3.Collection
         public FastHashSetM2(DoubleKeyMode dkmode) : this(4, dkmode) { }
         public FastHashSetM2(int capacity, DoubleKeyMode dkmode)
         {
-            int cap = HashPrimes.GetPrimeM2(capacity);
+            int cap = GetPrimeM2(capacity);
 
             _bucket = new int[cap];
 

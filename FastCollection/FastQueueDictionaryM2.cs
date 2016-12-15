@@ -215,6 +215,7 @@ namespace Nano3.Collection
                 goto FINDMATCH;
             }
         }
+
         public TValue Peek()
         {
             if (Count == 0) { throw new ArgumentOutOfRangeException("No items"); }

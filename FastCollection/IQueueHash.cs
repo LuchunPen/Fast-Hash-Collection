@@ -18,6 +18,7 @@ namespace Nano3.Collection
 
         TValue[] DequeueAll();
         TValue[] GetValues();
+                   
         void Clear();
     }
 
