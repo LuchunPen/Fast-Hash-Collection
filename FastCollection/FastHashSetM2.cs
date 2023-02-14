@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (c) Luchunpen (bwolf88).  All rights reserved.
+Copyright (c) Luchunpen.
 Date: 24.01.2016 18:46:14
 */
 
@@ -14,21 +14,18 @@ namespace Nano3.Collection
     {
         //private static readonly string stringUID = "ABC188E99ACD9C04";
 
-        protected static readonly int[] primesM2 =
-        {
-            4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
-            8192, 16384, 32768, 65536, 131072, 262144, 524288,
-            1048576, 2097152, 4194304, 8388608
-        };
+        protected static int MinCapacity = 4;
 
         protected static int GetPrimeM2(int capacity)
         {
-            if (capacity < primesM2[0]) { return primesM2[0]; }
-            for (int i = 0; i < primesM2.Length; i++)
+            int result = MinCapacity;
+            for (int i = MinCapacity; i < int.MaxValue; i *= 2)
             {
-                if (primesM2[i] >= capacity) { return primesM2[i]; }
+                result = i;
+                if (capacity < result) { continue; }
+                break;
             }
-            return primesM2[primesM2.Length - 1];
+            return result;
         }
 
         protected int[] _bucket;
@@ -246,6 +243,8 @@ namespace Nano3.Collection
 
         public TValue[] GetValues()
         {
+            if (Count <= 0) { return new TValue[0]; }
+
             TValue[] v = new TValue[Count];
             int id = 0;
             for (int i = 0; i < _count; i++)
