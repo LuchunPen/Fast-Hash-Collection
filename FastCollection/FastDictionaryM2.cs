@@ -337,7 +337,7 @@ namespace Nano3.Collection
 
         public KeyValuePair<TKey, TValue>[] GetKeyValues()
         {
-            if (Count <= 0) { return new eyValuePair<TKey, TValue>[0]; }
+            if (Count <= 0) { return new KeyValuePair<TKey, TValue>[0]; }
 
             KeyValuePair<TKey, TValue>[] kv = new KeyValuePair<TKey, TValue>[Count];
             int id = 0;
