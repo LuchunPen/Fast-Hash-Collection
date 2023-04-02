@@ -14,6 +14,13 @@ namespace Nano3.Collection
     {
         //private static readonly string stringUID = "ABC188E99ACD9C04";
 
+        public enum DoubleKeyMode
+        {
+            KeepExist = 0,
+            Repcale = 1,
+            ThrowException = 2
+        }
+
         protected static int MinCapacity = 4;
 
         protected static int GetPrimeM2(int capacity)

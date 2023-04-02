@@ -9,10 +9,31 @@ using System.Collections.Generic;
 
 namespace Nano3.Collection
 {
+    public interface IQueueHash<TValue> : IEnumerable<TValue>
+    {
+        int Count { get; }
+        bool Enqueue(TValue item);
+        TValue Dequeue();
+        TValue Peek();
+        bool Contains(TValue item);
+
+        TValue[] DequeueAll();
+        TValue[] GetValues();
+
+        void Clear();
+    }
+
     public class FastQueueHashM2<TValue> : IQueueHash<TValue>
         where TValue : IEquatable<TValue>
     {
         //private static readonly string stringUID = "ABC188DDDF3DD103";
+
+        public enum DoubleKeyMode
+        {
+            KeepExist = 0,
+            Repcale = 1,
+            ThrowException = 2
+        }
 
         protected static int MinCapacity = 4;
 

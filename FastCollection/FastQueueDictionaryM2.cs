@@ -9,10 +9,36 @@ using System.Collections.Generic;
 
 namespace Nano3.Collection
 {
+    public interface IQueueDictionary<TKey, TValue> : IEnumerable<TValue>
+    {
+        TValue this[TKey key] { get; set; }
+
+        int Count { get; }
+        bool ContainsKey(TKey key);
+        bool Enqueue(TKey key, TValue value);
+        TValue Dequeue();
+        TValue Peek();
+
+        KeyValuePair<TKey, TValue> DequeuePair();
+        KeyValuePair<TKey, TValue> PeekPair();
+        KeyValuePair<TKey, TValue>[] DequeueAllKeyValues();
+
+        TValue[] DequeueAll();
+        TValue[] GetValues();
+        void Clear();
+    }
+
     public class FastQueueDictionaryM2<TKey, TValue> : IQueueDictionary<TKey, TValue>
         where TKey : struct, IEquatable<TKey>
     {
         //private static readonly string stringUID = "BC12A1ACDE9EA403";
+
+        public enum DoubleKeyMode
+        {
+            KeepExist = 0,
+            Repcale = 1,
+            ThrowException = 2
+        }
 
         protected static int MinCapacity = 4;
 
