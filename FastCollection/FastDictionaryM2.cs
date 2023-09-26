@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Nano3.Collection
 {
-    public class FastDictionaryM2<TKey, TValue> : IDictionary<TKey, TValue>
+    public class FastDictionaryM2<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
         where TKey : struct, IEquatable<TKey>
     {
         //private static readonly string stringUID = "CC78FEF1FDAD4302";
@@ -48,6 +48,9 @@ namespace Nano3.Collection
         protected int _nextFree;
         protected int _size;
         protected int _mask;
+
+        protected KeyCollection _keyCollection;
+        protected ValueCollection _valueCollection;
 
         protected DoubleKeyMode _dkMode;
         public DoubleKeyMode DKMode { get { return _dkMode; } }
@@ -144,6 +147,16 @@ namespace Nano3.Collection
                 itempos = _next[itempos];
                 goto FINDMATCH;
             }
+        }
+
+        public bool ContainsValue(TValue value)
+        {
+            EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
+            for (int i = 0; i < _count; i++)
+            {
+                if (_fillmarker[i] == true && c.Equals(_values[i], value)) return true;
+            }
+            return false;
         }
 
         public virtual void Add(TKey key, TValue value)
@@ -314,7 +327,7 @@ namespace Nano3.Collection
             }
         }
 
-        public TKey[] GetKeys()
+        public TKey[] GetKeysArray()
         {
             if (Count <= 0) { return new TKey[0]; }
 
@@ -328,7 +341,7 @@ namespace Nano3.Collection
             return k;
         }
 
-        public TValue[] GetValues()
+        public TValue[] GetValuesArray()
         {
             if (Count <= 0) { return new TValue[0]; }
 
@@ -431,12 +444,20 @@ namespace Nano3.Collection
 
         public ICollection<TKey> Keys
         {
-            get { return GetKeys(); }
+            get
+            {
+                if (_keyCollection == null) { _keyCollection = new KeyCollection(this); }
+                return _keyCollection;
+            }
         }
 
         public ICollection<TValue> Values
         {
-            get { return GetValues(); }
+            get
+            {
+                if (_valueCollection == null) { _valueCollection = new ValueCollection(this); }
+                return _valueCollection;
+            }
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -451,6 +472,147 @@ namespace Nano3.Collection
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
+        {
+            get
+            {
+                if (_keyCollection == null) { _keyCollection = new KeyCollection(this); }
+                return _keyCollection;
+            }
+        }
+
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
+        {
+            get
+            {
+                if (_valueCollection == null) { _valueCollection = new ValueCollection(this); }
+                return _valueCollection;
+            }
+        }
+
+
+        public sealed class KeyCollection : IEnumerable<TKey>, ICollection<TKey>
+        {
+            private FastDictionaryM2<TKey, TValue> _dictionary;
+            public KeyCollection(FastDictionaryM2<TKey, TValue> dictionary)
+            {
+                _dictionary = dictionary;
+            }
+
+            public int Count { get { return _dictionary.Count; } }
+
+            public bool IsReadOnly { get { return true; } }
+
+            public bool Contains(TKey item)
+            {
+                return _dictionary.ContainsKey(item);
+            }
+
+            public void Add(TKey item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Remove(TKey item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CopyTo(TKey[] array, int arrayIndex)
+            {
+                if (array == null) { throw new ArgumentNullException("Array is null"); }
+                if (arrayIndex < 0 || arrayIndex > array.Length) { throw new ArgumentOutOfRangeException(); }
+                if (array.Length - arrayIndex < Count) { throw new ArgumentOutOfRangeException("Destination array is to small"); }
+
+                int id = 0;
+                for (int i = 0; i < _dictionary._count; i++)
+                {
+                    if (!_dictionary._fillmarker[i]) continue;
+                    array[id++] = _dictionary._keys[i];
+                }
+            }
+
+            public IEnumerator<TKey> GetEnumerator()
+            {
+                for (int i = 0; i < _dictionary._count; i++)
+                {
+                    if (!_dictionary._fillmarker[i]) continue;
+                    yield return _dictionary._keys[i];
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+        }
+
+        public sealed class ValueCollection : IEnumerable<TValue>, ICollection<TValue>
+        {
+            private FastDictionaryM2<TKey, TValue> _dictionary;
+            public ValueCollection(FastDictionaryM2<TKey, TValue> dictionary)
+            {
+                _dictionary = dictionary;
+            }
+
+            public int Count { get { return _dictionary.Count; } }
+
+            public bool IsReadOnly { get { return true; } }
+
+            public bool Contains(TValue item)
+            {
+                return _dictionary.ContainsValue(item);
+            }
+
+            public void Add(TValue item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Remove(TValue item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CopyTo(TValue[] array, int arrayIndex)
+            {
+                if (array == null) { throw new ArgumentNullException("Array is null"); }
+                if (arrayIndex < 0 || arrayIndex > array.Length) { throw new ArgumentOutOfRangeException(); }
+                if (array.Length - arrayIndex < Count) { throw new ArgumentOutOfRangeException("Destination array is to small"); }
+
+                int id = 0;
+                for (int i = 0; i < _dictionary._count; i++)
+                {
+                    if (!_dictionary._fillmarker[i]) continue;
+                    array[id++] = _dictionary._values[i];
+                }
+            }
+
+            public IEnumerator<TValue> GetEnumerator()
+            {
+                for (int i = 0; i < _dictionary._count; i++)
+                {
+                    if (!_dictionary._fillmarker[i]) continue;
+                    yield return _dictionary._values[i];
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
         }
     }
 }
