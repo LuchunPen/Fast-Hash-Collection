@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Nano3.Collection
 {
-    public class FastHashSetM2<TValue> : ICollection<TValue>
+    public class FastHashSetM2<TValue> : ICollection<TValue>, IReadOnlyCollection<TValue>
         where TValue : IEquatable<TValue>
     {
         //private static readonly string stringUID = "ABC188E99ACD9C04";
@@ -47,6 +47,8 @@ namespace Nano3.Collection
         protected int _nextFree;
         protected int _size;
         protected int _mask;
+        protected bool _isReadOnly;
+
         protected DoubleKeyMode _dkMode;
         public DoubleKeyMode DKMode { get { return _dkMode; } }
 
@@ -74,11 +76,14 @@ namespace Nano3.Collection
 
         public bool IsReadOnly
         {
-            get { return false; }
+            get { return _isReadOnly; }
+            set { _isReadOnly = value; }
         }
 
         public virtual void Add(TValue item)
         {
+            if (_isReadOnly) { throw new NotImplementedException(); }
+
             int hash = item.GetHashCode() & _mask;
             int itempos = _bucket[hash];
 
@@ -128,6 +133,8 @@ namespace Nano3.Collection
 
         public void Add(TValue[] items)
         {
+            if (_isReadOnly) { throw new NotImplementedException(); }
+
             if (items == null || items.Length == 0) { return; }
             for (int i = 0; i < items.Length; i++)
             {
@@ -137,6 +144,8 @@ namespace Nano3.Collection
 
         public void Add(List<TValue> items)
         {
+            if (_isReadOnly) { throw new NotImplementedException(); }
+
             if (items == null || items.Count == 0) { return; }
             int count = items.Count;
             for (int i = 0; i < count; i++)
@@ -147,6 +156,8 @@ namespace Nano3.Collection
 
         public bool Remove(TValue item)
         {
+            if (_isReadOnly) { throw new NotImplementedException(); }
+
             int hash = item.GetHashCode() & _mask;
             int itempos = _bucket[hash];
 
@@ -204,6 +215,8 @@ namespace Nano3.Collection
 
         public virtual void Clear()
         {
+            if (_isReadOnly) { throw new NotImplementedException(); }
+
             if (Count > 0)
             {
                 Array.Clear(_bucket, 0, _bucket.Length);
@@ -248,7 +261,7 @@ namespace Nano3.Collection
             _mask = newMask;
         }
 
-        public TValue[] GetValues()
+        public TValue[] GetValuesArray()
         {
             if (Count <= 0) { return new TValue[0]; }
 
@@ -270,6 +283,7 @@ namespace Nano3.Collection
                 yield return _values[i];
             }
         }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();

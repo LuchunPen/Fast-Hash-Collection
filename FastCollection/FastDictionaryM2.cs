@@ -327,7 +327,7 @@ namespace Nano3.Collection
             }
         }
 
-        public TKey[] GetKeysArray()
+        public TKey[] KeysToArray()
         {
             if (Count <= 0) { return new TKey[0]; }
 
@@ -341,7 +341,7 @@ namespace Nano3.Collection
             return k;
         }
 
-        public TValue[] GetValuesArray()
+        public TValue[] ValuesToArray()
         {
             if (Count <= 0) { return new TValue[0]; }
 
@@ -355,7 +355,7 @@ namespace Nano3.Collection
             return v;
         }
 
-        public KeyValuePair<TKey, TValue>[] GetKeyValues()
+        public KeyValuePair<TKey, TValue>[] KeyValuesToArray()
         {
             if (Count <= 0) { return new KeyValuePair<TKey, TValue>[0]; }
 

@@ -18,12 +18,12 @@ namespace Nano3.Collection
         bool Contains(TValue item);
 
         TValue[] DequeueAll();
-        TValue[] GetValues();
+        TValue[] ToArray();
 
         void Clear();
     }
 
-    public class FastQueueHashM2<TValue> : IQueueHash<TValue>
+    public class FastQueueHashM2<TValue> : IQueueHash<TValue>, IReadOnlyCollection<TValue>
         where TValue : IEquatable<TValue>
     {
         //private static readonly string stringUID = "ABC188DDDF3DD103";
@@ -218,7 +218,7 @@ namespace Nano3.Collection
 
         public TValue[] DequeueAll()
         {
-            TValue[] v = GetValues();
+            TValue[] v = ToArray();
             Clear();
             return v;
         }
@@ -285,7 +285,7 @@ namespace Nano3.Collection
             _qmask = newsize - 1;
         }
 
-        public TValue[] GetValues()
+        public TValue[] ToArray()
         {
             if (Count <= 0) { return new TValue[0]; }
             TValue[] v = new TValue[Count];
